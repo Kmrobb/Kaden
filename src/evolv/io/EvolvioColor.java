@@ -6,6 +6,8 @@ import java.util.List;
 import evolv.io.peripherals.MouseAction;
 import evolv.io.peripherals.MouseButton;
 import evolv.io.peripherals.Peripherals;
+import evolv.io.renderers.BlankBoardRenderer;
+import evolv.io.renderers.Renderer;
 import processing.core.PApplet;
 import processing.core.PFont;
 import processing.event.KeyEvent;
@@ -15,10 +17,12 @@ public class EvolvioColor extends PApplet {
 	private static final List<BoardAction> BOARD_ACTIONS = Arrays.asList(new BoardAction.ToggleUserControl(),
 			new BoardAction.ChangeSpawnChance(), new BoardAction.PrepareForFileSave(0),
 			new BoardAction.ChangeImageSaveInterval(), new BoardAction.PrepareForFileSave(2),
-			new BoardAction.ChangeTextSaveInterval(), new BoardAction.ChangePlaySpeed(), new BoardAction.ToggleRender());
+			new BoardAction.ChangeTextSaveInterval(), new BoardAction.ChangePlaySpeed(),
+			new BoardAction.ToggleRender());
 
 	private final int seed = parseInt(random(1000000));
 	private final Peripherals peripherals = new Peripherals();
+	private final Renderer<Board> blankBoardRenderer = new BlankBoardRenderer();
 
 	private Board evoBoard;
 	private float scaleFactor;
@@ -73,9 +77,18 @@ public class EvolvioColor extends PApplet {
 
 	@Override
 	public void draw() {
+	   update();
+	   respondToUser();
+	   render();
+	}
+
+	private void update(){
 		for (int iteration = 0; iteration < evoBoard.getPlaySpeed(); iteration++) {
 			evoBoard.iterate(Configuration.TIME_STEP);
 		}
+	}
+
+	private void respondToUser(){
 		if (dist(prevMouseX, prevMouseY, mouseX, mouseY) > 5) {
 			draggedFar = true;
 		}
@@ -98,13 +111,16 @@ public class EvolvioColor extends PApplet {
 		} else {
 			cameraR = 0;
 		}
+	}
+
+	private void render(){
 		pushMatrix();
 		scale(scaleFactor);
-		evoBoard.drawBlankBoard(Configuration.SCALE_TO_FIXBUG);
+		blankBoardRenderer.render(this, evoBoard);
 		translate(Configuration.BOARD_WIDTH * 0.5f * Configuration.SCALE_TO_FIXBUG,
 				Configuration.BOARD_HEIGHT * 0.5f * Configuration.SCALE_TO_FIXBUG);
 		scale(zoom);
-		if (evoBoard.getSelectedCreature() != null) {
+		if (evoBoard.isUserControl() && evoBoard.getSelectedCreature() != null) {
 			rotate(cameraR);
 		}
 		translate(-cameraX * Configuration.SCALE_TO_FIXBUG, -cameraY * Configuration.SCALE_TO_FIXBUG);

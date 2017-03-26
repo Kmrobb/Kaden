@@ -114,8 +114,11 @@ public class Board {
 		}
 		for (int x = 0; x < Configuration.BOARD_WIDTH; x++) {
 			for (int y = 0; y < Configuration.BOARD_HEIGHT; y++) {
-				tiles[x][y].drawTile(scaleUp, camZoom, (mX == x && mY == y));
+				tiles[x][y].drawTile(scaleUp, camZoom);
 			}
+		}
+		if (mX >= 0 && mX < Configuration.BOARD_WIDTH && mY >= 0 && mY < Configuration.BOARD_HEIGHT) {
+			tiles[mX][mY].drawEnergy(scaleUp, camZoom);
 		}
 		for (int i = 0; i < rocks.size(); i++) {
 			rocks.get(i).drawSoftBody(scaleUp);
@@ -123,11 +126,6 @@ public class Board {
 		for (int i = 0; i < creatures.size(); i++) {
 			creatures.get(i).drawSoftBody(scaleUp, camZoom, true);
 		}
-	}
-
-	public void drawBlankBoard(float scaleUp) {
-		this.evolvioColor.fill(backgroundColor);
-		this.evolvioColor.rect(0, 0, scaleUp * Configuration.BOARD_WIDTH, scaleUp * Configuration.BOARD_HEIGHT);
 	}
 
 	public void drawUI(float scaleUp, float camZoom, double timeStep, int x1, int y1, int x2, int y2) {
